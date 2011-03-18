@@ -1,0 +1,20 @@
+form.col.col_8(method="post")
+  fieldset
+    legend Sign Up
+    div
+      label(for='email') Username:
+      input.box_shadow(autofocus, type="text", name="username", minlength="4", remote="")
+    div
+      label Password:
+      input.box_shadow(type="password", name="password", id="password")
+
+    div
+      label Repeat Password:
+      input.box_shadow(type="password", name="repeat-password", equalTo="password")
+
+    input(type='submit', value='Submit')
+    input(type='reset', value='Reset')
+
+script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js")
+script(src="http://ajax.microsoft.com/ajax/jquery.validate/1.7/jquery.validate.min.js")
+script(src="/static/js/signup.js")

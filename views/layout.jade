@@ -1,0 +1,60 @@
+!!! 5
+html
+  head
+    meta(charset="utf-8")
+    title #{title} - Node-Fourm
+    /if lt IE 9
+      script(src="http://html5shim.googlecode.com/svn/trunk/html5.js")
+    // link(rel="stylesheet", media="all", href="/stylesheets/less.css")
+    link(rel='stylesheet', media='screen', href='/stylesheets/style.css')
+    meta(name="viewport", content="width=device-width, initial-scale=1")
+    // Adding "maximum-scale=1" fixes the Mobile Safari auto-zoom bug: http://filamentgroup.com/examples/iosScaleBug/ 
+  body(lang='en')
+    .row
+      header
+        .col.col_7.logo Node-Fourm
+        .col.col_9
+          .userinfo
+            -if(user)
+              span Welcome&nbsp;
+                a(href='/user/profile')= user.username
+              span |
+              span
+                a(href='/user/logout') Logout
+            -else
+              span
+                a(href='/user/login') Login
+              span |
+              span
+                a(href='/user/signup') Signup
+          nav
+            ul
+              li
+                a(href='/') Home
+              li.last
+                a(href='/about') About
+
+        .clear
+
+    section.row
+      .col.col_11!= body
+      .col.col_5.sidebar
+        div
+          input(type='search', placeholder='search here')
+          input(type='submit') Go
+
+        aside
+          img(src='http://html5doctor.com/wp-content/themes/html5doctor/img/introducing-html5-ad.jpg', alt='Adversiting)
+        nav
+          h3 Recently Topics
+          ul
+            li
+              a(href='#') Topic 1
+            li
+              a(href='#') Topic 2
+            li
+              a(href='#') Topic 3
+
+    footer.row
+      p &copy;all rights reservered. 
+

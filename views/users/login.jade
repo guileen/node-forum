@@ -1,0 +1,12 @@
+form.col.col_8(method="post")
+  fieldset
+    legend Login
+    - if (typeof message !== 'undefined')
+      p.error #{message}
+    div
+      label Username
+      input.box_shadow(autofocus, type="text", name="username")
+    div
+      label Password
+      input.box_shadow(type="password", name="password")
+    input(type='submit', value='Submit')
