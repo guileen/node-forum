@@ -30,10 +30,6 @@ app.dynamicHelpers({
 
 # Routes
 
-app.get '/', (req, res) ->
-  res.render 'index', 
-    title: 'Express'
-
 route app
 
 # Only listen on $ node app.js
