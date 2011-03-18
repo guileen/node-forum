@@ -1,6 +1,6 @@
 module.exports = 
 
-  home: (req, res) ->
+  getHome: (req, res) ->
     res.render 'index', 
       title: 'Home'
 

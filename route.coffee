@@ -1,5 +1,6 @@
 {loggedIn, role } = require './middlewares'
 users = require './controllers/users'
+home = require './controllers/home'
 
 module.exports = (app) ->
 
