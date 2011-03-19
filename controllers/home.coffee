@@ -1,6 +1,10 @@
+Topic = require '../providers/topics'
+
 module.exports = 
 
   getHome: (req, res) ->
-    res.render 'index', 
-      title: 'Home'
+    Topic.findItems (err, topics) ->
+      res.render 'topic/list', 
+        topics: topics
+        title: 'Home'
 
