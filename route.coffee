@@ -1,8 +1,13 @@
 {loggedIn, role } = require './middlewares'
-users = require './controllers/users'
 home = require './controllers/home'
+users = require './controllers/users'
+topics = require './controllers/topics'
 
 module.exports = (app) ->
+
+
+  #Home
+  app.get '/', home.getHome
 
   # Users
   app.get '/user/login', users.getLogin
@@ -13,5 +18,10 @@ module.exports = (app) ->
   app.post '/user/profile', loggedIn, users.postProfile
   app.get '/user/logout', loggedIn, users.getLogout
 
-  #Home
-  app.get '/', home.getHome
+  # Topics
+  app.param 'topicId', topics.paramTopicId
+  app.get '/topic/new', topics.getNewTopic
+  app.get '/topic/:topicId/modify', topics.getModifyTopic
+  app.get '/topic/:topicId', topics.getTopic
+  app.post '/topic/:topicId?', topics.postTopic
+  app.post '/topic/:topicId/comment/:commentIndex?', topics.postComment

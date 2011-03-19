@@ -1,0 +1,13 @@
+form.col.col_10(method="post", action='/topic/' + topicId)
+  fieldset.s_column
+    legend= title
+    div
+      label Title
+      input.box_shadow(autofocus, type="text", name="title", minlength="4", value= topic.title)
+    div
+      label Content
+      textarea.box_shadow(name='content')= topic.content
+
+    input(type='submit', value='Submit')
+
+

@@ -1,0 +1,24 @@
+article
+  h1= topic.title
+  span.information topic information, authors, date ...
+  != topic.content
+
+h2 Comments
+- if(typeof topic.comments != 'undefined')
+  ul.comments#comments
+    - each comment in topic.comments
+      li
+        span.comment_information comment information
+        != comment.comment
+- else
+  p there is no comments yet
+
+form.col_8.add_comment(method='post',action='/topic/' + topic._id +'/comment' )
+  fieldset
+    legend Add your comment
+    .textarea
+      label comment
+      textarea.box_shadow(name='comment')
+     input(type='submit', value='Add Comment') 
+
+.clear
