@@ -46,6 +46,7 @@ module.exports =
       topic = 
         title: req.body.title
         content: req.body.content
+        author: req.session.user
         createDate: new Date()
         lastUpdate: new Date()
 
@@ -56,8 +57,6 @@ module.exports =
 
   postComment : (req, res) ->
     topic = req.topic
-    console.log 'post comment'
-    console.dir topic
     if req.param.commentIndex
       if req.query.delete
         topic.comments.splice(req.param.commentIndex, 1)
@@ -67,10 +66,10 @@ module.exports =
       topic.comments or= []
       topic.comments.push({
         comment: req.body.comment,
-        user: req.session.user 
+        user: req.session.user,
+        createDate: new Date(),
+        lastUpdate: new Date()
       })
-    console.log 'modified topic'
-    console.dir topic
 
     Topic.save topic, (err, topic) ->
       res.render 'topic/show'

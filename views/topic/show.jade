@@ -1,6 +1,6 @@
 article
   h1= topic.title
-  span.information topic information, authors, date ...
+  span.information Post by <b>#{topic.author.username}</b> on <i>#{topic.createDate}</i>
   = topic.content
 
 h2 Comments
@@ -8,7 +8,7 @@ h2 Comments
   ul.comments#comments
     - each comment in topic.comments
       li
-        span.comment_information comment information
+        span.comment_information Post by <b>#{comment.user.username}</b> on <i>#{comment.createDate}</i> 
         = comment.comment
 - else
   p there is no comments yet
