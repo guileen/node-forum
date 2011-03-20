@@ -4,4 +4,8 @@
     a(href='/topic/' + topic._id)
       h2= topic.title
     p= topic.content
+    .tags
+      - if(typeof topic.tags != 'undefined')
+        - each tag in topic.tags
+          a.tag(href='/topic/tagged/' + tag)= tag
 
