@@ -5,8 +5,11 @@ ObjectID = mongodb.BSONNative.ObjectID
 checkTags = (tags, fn) ->
   tags = tags.replace /\s+,/g, ' '
   tags = tags.replace /\s+$/g, ''
-  tags = tags.split(' ')
-  fn null, tags
+  if tags.length > 0
+    tags = tags.split(' ')
+    fn null, tags
+  else
+    fn null, []
 
 module.exports = 
 
@@ -23,14 +26,14 @@ module.exports =
       next()
 
   getTopics : (req, res) ->
-    Topic.findItems {}, {comments:0}, (err, topics) ->
+    Topic.findItems {}, {comments:0}, {sort: [['lastUpdate', -1]]}, (err, topics) ->
       res.render 'topic/list', 
         topics: topics
         title: 'Latest topics'
 
   getTaggedTopics : (req, res) ->
     tags = req.params.tags.split('+')
-    Topic.findItems { tags : { $all : tags } }, (err, topics) ->
+    Topic.findItems { tags : { $all : tags } }, {sort: [['lastUpdate', -1]]}, (err, topics) ->
       res.render 'topic/list', 
         topics: topics
         title: 'Latest topics'

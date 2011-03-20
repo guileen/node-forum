@@ -1,4 +1,6 @@
 token_key = '__any_auth_token'
+recentlyTopics = require './recentlyTopics'
+
 exports.cookieUser = (req, res, next) ->
   token = req.cookies[token_key]
 
@@ -15,3 +17,6 @@ exports.role = (role) ->
       next()
     else
       next new Error "Unauthorized"
+
+exports.recentlyTopics = recentlyTopics
+

@@ -26,6 +26,9 @@ app.configure 'production', () ->
 app.dynamicHelpers({
   user: (req) ->
     req.session.user
+
+  recentlyTopics: (req) ->
+    req.recentlyTopics
 })
 
 # Routes

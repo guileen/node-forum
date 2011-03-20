@@ -1,10 +1,12 @@
-{loggedIn, role } = require './middlewares'
+{loggedIn, role, recentlyTopics } = require './middlewares'
 home = require './controllers/home'
 users = require './controllers/users'
 topics = require './controllers/topics'
 
 module.exports = (app) ->
 
+  #Middlewares
+  app.all '*', recentlyTopics
 
   #Home
   app.get '/', home.getHome

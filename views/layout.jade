@@ -49,12 +49,9 @@ html
         nav
           h3 Recently Topics
           ul
-            li
-              a(href='#') Topic 1
-            li
-              a(href='#') Topic 2
-            li
-              a(href='#') Topic 3
+            - each topic in recentlyTopics
+              li
+                a(href='/topic/' + topic._id)= topic.title
 
     footer.row
       p &copy;all rights reservered. 
