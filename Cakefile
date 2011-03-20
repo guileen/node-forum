@@ -19,3 +19,12 @@ task "run", ->
     process.stdout.write data
   server.stderr.on 'data', (data) ->
     process.stderr.write data
+
+task "drop", ->
+  config = require './config'
+  config.db.open (err, db)->
+    if db 
+      db.dropDatabase (err, db) ->
+        if not err
+          console.log 'database dropped'
+          invoke 'run'
