@@ -38,7 +38,6 @@ module.exports =
         topics: topics
         title: 'Latest topics'
 
-
   getNewTopic : (req, res) ->
     res.render 'topic/new',
       title: 'New Topic'
@@ -67,21 +66,23 @@ module.exports =
       topic.tags = tags or []
 
       Topic.save topic, (err, topic)->
-        res.render 'topic/show',
-          topic: topic
-          title: topic.title
+        res.redirect "/topic/#{topic._id}"
 
   postComment : (req, res) ->
     topic = req.topic
+    index = 0
     if req.param.commentIndex
       if req.query.delete
         topic.comments.splice(req.param.commentIndex, 1)
         topic.numComments--
       else
+        index = req.param.commentIndex + 1
         topic.comments[req.param.commentIndex].comment = req.body.comment
     else
       topic.comments or= []
+      index = topic.comments.length + 1
       topic.comments.push({
+        index: index,
         comment: req.body.comment,
         user: req.session.user,
         createDate: new Date(),
@@ -90,7 +91,5 @@ module.exports =
       topic.numComments++
 
     Topic.save topic, (err, topic) ->
-      res.render 'topic/show'
-        topic: topic
-        title: topic.title
+      res.redirect "/topic/#{topic._id}##{index}"
 

@@ -12,6 +12,7 @@ h2 #{topic.numComments} comments
   ul.comments#comments
     - each comment in topic.comments
       li
+        a(name=comment.index)
         span.comment_information Post by <b>#{comment.user.username}</b> on <i>#{comment.createDate}</i> 
         = comment.comment
 - else
@@ -21,8 +22,8 @@ form.col_8.add_comment(method='post',action='/topic/' + topic._id +'/comment' )
   fieldset
     legend Add your comment
     .textarea
-      label comment
-      textarea.box_shadow(name='comment')
+      label(for='comment', accesskey='r') Comment(Alt+R)
+      textarea.box_shadow(id='comment',name='comment')
      input(type='submit', value='Add Comment') 
 
 .clear
