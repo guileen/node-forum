@@ -25,3 +25,5 @@ module.exports = (app) ->
   app.get '/topic/:topicId', topics.getTopic
   app.post '/topic/:topicId?', loggedIn, topics.postTopic
   app.post '/topic/:topicId/comment/:commentIndex?', loggedIn, topics.postComment
+  # tags
+  app.get '/topic/tagged/:tags', topics.getTaggedTopics

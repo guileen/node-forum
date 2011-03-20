@@ -2,6 +2,10 @@ article
   h1= topic.title
   span.information Post by <b>#{topic.author.username}</b> on <i>#{topic.createDate}</i>
   = topic.content
+  .post-tags
+    - if(typeof topic.tags != 'undefined')
+      - each tag in topic.tags
+        a.tag(href='/topic/tagged/' + tag)= tag
 
 h2 Comments
 - if(typeof topic.comments != 'undefined')

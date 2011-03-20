@@ -2,6 +2,12 @@ Topic = require '../providers/topics'
 mongodb = require 'mongodb'
 ObjectID = mongodb.BSONNative.ObjectID
 
+checkTags = (tags, fn) ->
+  if typeof tags is 'string'
+    tags.replace /\s+,/g, ' '
+    tags = tags.split(' ')
+  fn null, tags
+
 module.exports = 
 
   paramTopicId: (req, res, next, id) ->
@@ -17,10 +23,18 @@ module.exports =
       next()
 
   getTopics : (req, res) ->
-    Topic.findItems (err, topics) ->
+    Topic.findItems {}, {comments:0}, (err, topics) ->
       res.render 'topic/list', 
         topics: topics
         title: 'Latest topics'
+
+  getTaggedTopics : (req, res) ->
+    tags = req.params.tags.split('+')
+    Topic.findItems { tags : { $all : tags } }, (err, topics) ->
+      res.render 'topic/list', 
+        topics: topics
+        title: 'Latest topics'
+
 
   getNewTopic : (req, res) ->
     res.render 'topic/new',
@@ -37,23 +51,21 @@ module.exports =
       title: req.topic.title
 
   postTopic : (req, res) ->
-    if req.topic
-      topic = req.topic
+    checkTags req.body.tags, (err, tags) ->
+      topic = req.topic or {
+        author: req.session.user,
+        createDate: new Date()
+      }
+
       topic.title= req.body.title
       topic.content = req.body.content
       topic.lastUpdate = new Date()
-    else
-      topic = 
-        title: req.body.title
-        content: req.body.content
-        author: req.session.user
-        createDate: new Date()
-        lastUpdate: new Date()
+      topic.tags = tags
 
-    Topic.save topic, (err, topic)->
-      res.render 'topic/show',
-        topic: topic
-        title: topic.title
+      Topic.save topic, (err, topic)->
+        res.render 'topic/show',
+          topic: topic
+          title: topic.title
 
   postComment : (req, res) ->
     topic = req.topic
