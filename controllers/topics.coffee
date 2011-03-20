@@ -93,3 +93,38 @@ module.exports =
     Topic.save topic, (err, topic) ->
       res.redirect "/topic/#{topic._id}##{index}"
 
+  postVote: (req, res) ->
+    user = req.session.user.username
+    operation = req.params.updown
+    topic = req.topic
+    topic.voteUpUsers or= []
+    topic.voteDownUsers or= []
+    topic.voteUp or= 0
+    topic.voteDown or= 0
+    topic.vote or=0
+    indexOfVoteUp = topic.voteUpUsers.indexOf(user)
+    indexOfVoteDown = topic.voteDownUsers.indexOf(user)
+    if ((operation is 'up' and indexOfVoteUp >= 0 ) or (operation is 'down' and indexOfVoteDown >= 0))
+      if req.is 'json'
+        return res.send {success: false, message: 'You have voted'}
+      else 
+        return res.redirect "/topic/#{topic._id}"
+
+    if operation is 'up'
+      topic.voteUpUsers.push(user)
+      topic.voteUp++
+      if indexOfVoteDown >=0
+        topic.voteDownUsers.splice(indexOfVoteDown, 1)
+        topic.voteDown--
+    else if operation is 'down'
+      topic.voteDownUsers.push(user)
+      topic.voteDown++
+      if indexOfVoteUp >=0 
+        topic.voteUpUsers.splice(indexOfVoteUp, 1)
+        topic.voteUp--
+    topic.vote = topic.voteUp - topic.voteDown
+
+    Topic.save topic, (err, topic) ->
+      if req.is 'json'
+        return res.send {success: true, message: 'You have successfully voted'}
+      res.redirect "/topic/#{topic._id}"

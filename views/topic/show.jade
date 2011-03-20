@@ -7,6 +7,11 @@ article
       - each tag in topic.tags
         a.tag(href='/topic/tagged/' + tag)= tag
 
+  .votes
+    a.vote_up(href="/topic/" + topic._id + "/vote/up") #{topic.voteUp} Up
+    a.vote_down(href="/topic/" + topic._id + "/vote/down") #{topic.voteDown} Down
+  
+
 h2 #{topic.numComments} comments
 - if(typeof topic.comments != 'undefined')
   ul.comments#comments

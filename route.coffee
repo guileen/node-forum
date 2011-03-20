@@ -29,3 +29,5 @@ module.exports = (app) ->
   app.post '/topic/:topicId/comment/:commentIndex?', loggedIn, topics.postComment
   # tags
   app.get '/topic/tagged/:tags', topics.getTaggedTopics
+  # vote
+  app.get '/topic/:topicId/vote/:updown', loggedIn, topics.postVote
