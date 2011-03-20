@@ -3,6 +3,7 @@
   - each topic in topics
     a(href='/topic/' + topic._id)
       h2= topic.title
+    span.information Post by <b>#{topic.author.username}</b> on <i>#{topic.createDate}</i> with #{topic.numComments} comments
     p= topic.content
     .tags
       - if(typeof topic.tags != 'undefined')

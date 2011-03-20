@@ -3,9 +3,9 @@ mongodb = require 'mongodb'
 ObjectID = mongodb.BSONNative.ObjectID
 
 checkTags = (tags, fn) ->
-  if typeof tags is 'string'
-    tags.replace /\s+,/g, ' '
-    tags = tags.split(' ')
+  tags = tags.replace /\s+,/g, ' '
+  tags = tags.replace /\s+$/g, ''
+  tags = tags.split(' ')
   fn null, tags
 
 module.exports = 
@@ -54,13 +54,14 @@ module.exports =
     checkTags req.body.tags, (err, tags) ->
       topic = req.topic or {
         author: req.session.user,
+        numComments: 0,
         createDate: new Date()
       }
 
       topic.title= req.body.title
       topic.content = req.body.content
       topic.lastUpdate = new Date()
-      topic.tags = tags
+      topic.tags = tags or []
 
       Topic.save topic, (err, topic)->
         res.render 'topic/show',
@@ -72,6 +73,7 @@ module.exports =
     if req.param.commentIndex
       if req.query.delete
         topic.comments.splice(req.param.commentIndex, 1)
+        topic.numComments--
       else
         topic.comments[req.param.commentIndex].comment = req.body.comment
     else
@@ -82,6 +84,7 @@ module.exports =
         createDate: new Date(),
         lastUpdate: new Date()
       })
+      topic.numComments++
 
     Topic.save topic, (err, topic) ->
       res.render 'topic/show'
