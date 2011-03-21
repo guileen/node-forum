@@ -1,5 +1,4 @@
 .topics.col.col_10
-  a(href='/topic/new') New Topic
   - each topic in topics
     a(href='/topic/' + topic._id)
       h2= topic.title
