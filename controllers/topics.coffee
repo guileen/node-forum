@@ -1,8 +1,9 @@
 Topic = require '../providers/topics'
+TagInfo = require '../providers/taginfo'
 mongodb = require 'mongodb'
 ObjectID = mongodb.BSONNative.ObjectID
 
-checkTags = (tags, fn) ->
+tagsToArray = (tags, fn) ->
   tags = tags.replace /[\s,]+/g, ' '
   tags = tags.replace /\s+$/g, ''
   if tags.length > 0
@@ -10,6 +11,20 @@ checkTags = (tags, fn) ->
     fn null, tags
   else
     fn null, []
+
+compareTags = (oldTags, newTags, fn) ->
+  if oldTags and oldTags.length > 0
+    removedTags = oldTags.slice()
+    addedTags = newTags.slice()
+    for i in [addedTags.length - 1 .. 0]
+      tag = addedTags[i]
+      index = removedTags.indexOf(tag)
+      if index >= 0
+        removedTags.splice(index, 1)
+        addedTags.splice(i, 1)
+    fn addedTags, removedTags
+  else
+    fn newTags, oldTags
 
 module.exports = 
 
@@ -34,9 +49,11 @@ module.exports =
   getTaggedTopics : (req, res) ->
     tags = req.params.tags.split('+')
     Topic.findItems { tags : { $all : tags } }, {sort: [['lastUpdate', -1]]}, (err, topics) ->
-      res.render 'topic/list', 
-        topics: topics
-        title: 'Latest topics'
+      TagInfo.findItems {name: {$in : tags}}, (err, tagInfos) ->
+        res.render 'topic/list', 
+          topics: topics
+          title: 'Latest topics'
+          tagInfos: tagInfos
 
   getNewTopic : (req, res) ->
     res.render 'topic/new',
@@ -48,12 +65,14 @@ module.exports =
       topic: req.topic
 
   getTopic : (req, res) ->
-    res.render 'topic/show', 
-      topic: req.topic
-      title: req.topic.title
+    TagInfo.findItems {name: {$in : req.topic.tags}}, (err, tagInfos) ->
+      res.render 'topic/show', 
+        topic: req.topic
+        title: req.topic.title
+        tagInfos: tagInfos
 
   postTopic : (req, res) ->
-    checkTags req.body.tags, (err, tags) ->
+    tagsToArray req.body.tags, (err, tags) ->
       topic = req.topic or {
         author: req.session.user,
         numComments: 0,
@@ -66,10 +85,17 @@ module.exports =
       topic.title= req.body.title
       topic.content = req.body.content
       topic.lastUpdate = new Date()
-      topic.tags = tags or []
 
-      Topic.save topic, (err, topic)->
-        res.redirect "/topic/#{topic._id}"
+      # retrieve addedTags and removedTags
+      tags or= []
+      compareTags topic.tags, tags, (addedTags, removedTags)->
+        topic.tags = tags
+        Topic.save topic, (err, topic)->
+          res.redirect "/topic/#{topic._id}"
+          addedTags.forEach (tag)->
+            TagInfo.update {name: tag}, {$inc: {count: 1}}, {upsert: true}, (err, docs)->
+          TagInfo.update {name: {$in: removedTags}}, {$inc: {count: -1}}, (err, docs)->
+
 
   postComment : (req, res) ->
     topic = req.topic

@@ -15,19 +15,19 @@ html
         .col.col_7.logo 
           a(href='/') Node-Fourm
         .col.col_9
-          .userinfo
+          span.userinfo
             -if(user)
               span Welcome&nbsp;
-                a(href='/user/profile')= user.username
-              span |
-              span
-                a(href='/user/logout') Logout
+              a(href='/user/profile')= user.username
+              &nbsp;|&nbsp;
+              a(href='/user/logout') Logout
             -else
-              span
-                a(href='/user/login') Login
-              span |
-              span
-                a(href='/user/signup') Signup
+              a(href='/user/login') Login
+              &nbsp;|&nbsp;
+              a(href='/user/signup') Signup
+          span
+            input.rounded(type='search', placeholder='search here')
+            input.rounded(type='submit', value='Go')
           nav
             ul
               li
@@ -40,9 +40,13 @@ html
     section.row
       .col.col_11!= body
       .col.col_5.sidebar
-        div
-          input(type='search', placeholder='search here')
-          input(type='submit') Go
+        - if(typeof(tagInfos) != 'undefined')
+          .aside-tags
+            ul
+              - each tag in tagInfos
+                li
+                  a.tag(href='/topic/tagged/' + tag.name)= tag.name
+                  span (#{tag.count})
 
         aside
           img(src='http://html5doctor.com/wp-content/themes/html5doctor/img/introducing-html5-ad.jpg', alt='Adversiting')
