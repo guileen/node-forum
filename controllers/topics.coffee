@@ -57,6 +57,9 @@ module.exports =
       topic = req.topic or {
         author: req.session.user,
         numComments: 0,
+        voteUp: 0,
+        voteDown: 0,
+        vote: 0,
         createDate: new Date()
       }
 
