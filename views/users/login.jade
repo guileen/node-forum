@@ -1,12 +1,17 @@
-form.col.col_8(method="post")
+form#form_login.col.col_8(method="post")
   fieldset
     legend Login
     - if (typeof message !== 'undefined')
       p.error #{message}
     div
       label Username
-      input.box_shadow(autofocus, type="text", name="username")
+      input.required.box_shadow(autofocus, type="text", name="username", minlength='4')
     div
       label Password
-      input.box_shadow(type="password", name="password")
+      input.required.box_shadow(type="password", name="password")
     input(type='submit', value='Submit')
+
+script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js")
+script(src="http://ajax.microsoft.com/ajax/jquery.validate/1.7/jquery.validate.min.js")
+script
+  $('#form_login').validate()

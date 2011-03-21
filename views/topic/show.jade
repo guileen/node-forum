@@ -23,12 +23,17 @@ h2 #{topic.numComments} comments
 - else
   p there is no comments yet
 
-form.col_8.add_comment(method='post',action='/topic/' + topic._id +'/comment' )
+form#form_comment.col_8.add_comment(method='post',action='/topic/' + topic._id +'/comment' )
   fieldset
     legend Add your comment
     .textarea
       label(for='comment', accesskey='r') Comment(Alt+R)
-      textarea.box_shadow(id='comment',name='comment')
-     input(type='submit', value='Add Comment') 
+      textarea.required.box_shadow(id='comment', name='comment')
+    input(type='submit', value='Add Comment') 
 
 .clear
+
+script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js")
+script(src="http://ajax.microsoft.com/ajax/jquery.validate/1.7/jquery.validate.min.js")
+script
+  $('#form_comment').validate()

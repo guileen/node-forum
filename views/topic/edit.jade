@@ -1,14 +1,19 @@
-form.col.col_10(method="post", action='/topic/' + topicId)
+form#form_topic.col.col_10(method="post", action='/topic/' + topicId)
   fieldset.s_column
     legend title
     div
       label Title
-      input.box_shadow(autofocus, type="text", name="title", minlength="4", placeholder='input title here', value= topic.title)
+      input.required.box_shadow(autofocus, type="text", name="title", minlength="4", placeholder='input title here', value= topic.title)
     .textarea
       label Content
-      textarea.box_shadow(name='content', placeholder='input content here')= topic.content
+      textarea.required.box_shadow(name='content', minlength='20', placeholder='input content here')= topic.content
     div
       label Tags
-      input.box_shadow(type='text', name='tags', placeholder='separate with space', value=topic.tags.join(' '))
+      input.required.box_shadow(type='text', name='tags', placeholder='separate with space', value=topic.tags.join(' '))
 
     input(type='submit', value='Submit')
+
+script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js")
+script(src="http://ajax.microsoft.com/ajax/jquery.validate/1.7/jquery.validate.min.js")
+script
+  $('#form_topic').validate()

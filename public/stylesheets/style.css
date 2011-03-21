@@ -430,6 +430,10 @@ header {padding-top:25px; border-bottom:1px solid #ccc; padding-bottom:20px;}
 a {
   text-decoration: none;
 }
+label.error {
+  color: #f00;
+  font-style: italic;
+}
 .post-tags {
   margin: 5px;
 }
