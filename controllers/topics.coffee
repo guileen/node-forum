@@ -3,7 +3,7 @@ mongodb = require 'mongodb'
 ObjectID = mongodb.BSONNative.ObjectID
 
 checkTags = (tags, fn) ->
-  tags = tags.replace /\s+,/g, ' '
+  tags = tags.replace /[\s,]+/g, ' '
   tags = tags.replace /\s+$/g, ''
   if tags.length > 0
     tags = tags.split(' ')
