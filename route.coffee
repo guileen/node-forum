@@ -3,10 +3,13 @@ home = require './controllers/home'
 users = require './controllers/users'
 topics = require './controllers/topics'
 
+topTags = require './middlewares/toptags'
+
 module.exports = (app) ->
 
   #Middlewares
-  app.all '*', recentlyTopics
+  app.get '*', recentlyTopics
+  app.get '*', topTags
 
   #Home
   app.get '/', home.getHome

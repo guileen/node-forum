@@ -29,6 +29,9 @@ app.dynamicHelpers({
 
   recentlyTopics: (req) ->
     req.recentlyTopics
+
+  topTags: (req) ->
+    req.topTags
 })
 
 # Routes

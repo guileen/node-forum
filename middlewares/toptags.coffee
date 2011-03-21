@@ -1,5 +1,6 @@
-Topic = require '../providers/topics'
+TagInfo = require '../providers/taginfo'
 
 module.exports = (req, res, next) ->
-  next()
-
+  TagInfo.findItems {},{limit: 20, sort: [['count', -1]]}, (err, tagInfos) ->
+    req.topTags = tagInfos
+    next()

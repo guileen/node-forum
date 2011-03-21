@@ -42,14 +42,21 @@ html
       .col.col_5.sidebar
         - if(typeof(tagInfos) != 'undefined')
           .aside-tags
+            h3 Tags
             ul
               - each tag in tagInfos
                 li
                   a.tag(href='/topic/tagged/' + tag.name)= tag.name
                   span (#{tag.count})
 
-        aside
-          img(src='http://html5doctor.com/wp-content/themes/html5doctor/img/introducing-html5-ad.jpg', alt='Adversiting')
+        - if(typeof(topTags) != 'undefined')
+          nav.top_tags
+            h3 Top Tags
+            ul
+              - each tag in topTags
+                li
+                  a.tag(href='/topic/tagged/' + tag.name)= tag.name
+                  span (#{tag.count})
         nav
           h3 Recently Topics
           ul
