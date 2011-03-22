@@ -8,9 +8,10 @@ article
         a.tag(href='/tag/' + tag)= tag
 
   .votes
-    a.vote_up(href="/topic/" + topic._id + "/vote/up") #{topic.voteUp} Up
-    a.vote_down(href="/topic/" + topic._id + "/vote/down") #{topic.voteDown} Down
-  
+    a.vote_up(href="/topic/" + topic._id + "/vote/up") #{topic.voteUp} &#9650;
+    a.vote_down(href="/topic/" + topic._id + "/vote/down") #{topic.voteDown} &#9660;
+    a.nostar(href='#') &#9734;
+    a.star(href='#') &#9733;
 
 h2 #{topic.numComments} comments
 - if(typeof topic.comments != 'undefined')
