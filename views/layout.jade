@@ -42,15 +42,29 @@ html
         .clear
 
     section.row
-      .col.col_11!= body
+      .col.col_11
+         - if(typeof(boardTags) != 'undefined')
+           ul.current_tags
+             - each tag in boardTags
+               li
+                 a.tag(href='/tag/' + tag.name)= tag.name
+                 a.remove(href=urlRemoveTag(boardTags, tag.name)) &times;
+
+           - if(typeof(relativeTags) != 'undefined')
+             .tags.relative_tags
+               span &raquo;
+               - each tag in relativeTags
+                 a.tag(href=urlAddTag(boardTags, tag.name || tag._id))= tag.name || tag._id
+
+        != body
       .col.col_5.sidebar
         - if(typeof(tagInfos) != 'undefined')
-          .aside-tags
-            h3 Current tags
+          nav.page_tags
+            h3 Tags
             ul
               - each tag in tagInfos
                 li
-                  a.tag(href='/topic/tagged/' + tag.name)= tag.name
+                  a.tag(href='/tag/' + tag.name)= tag.name
                   span (#{tag.count})
 
         - if(typeof(topTags) != 'undefined')
@@ -59,7 +73,7 @@ html
             ul
               - each tag in topTags
                 li
-                  a.tag(href='/topic/tagged/' + tag.name)= tag.name
+                  a.tag(href='/tag/' + tag.name)= tag.name
                   span (#{tag.count})
         nav
           h3 Recently Topics

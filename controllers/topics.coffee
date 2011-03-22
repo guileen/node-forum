@@ -76,10 +76,11 @@ module.exports =
         res.render 'topic/list', 
           topics: topics
           title: 'Latest topics'
-          baseTagUrl: '/topic/tagged/'
           relativeTags: relativeTags
 
   getTaggedTopics : (req, res) ->
+    if not req.params.tags
+      return res.redirect '/'
     tags = req.params.tags.split('+')
     Topic.findItems { tags : { $all : tags } }, {sort: [['lastUpdate', -1]]}, (err, topics) ->
       TagInfo.findItems {name: {$in : tags}}, (err, tagInfos) ->
@@ -88,7 +89,6 @@ module.exports =
             topics: topics
             title: 'Latest topics'
             boardTags: tagInfos
-            baseTagUrl: "/topic/tagged/#{tags.join('+')}+"
             relativeTags: relativeTags
 
   getNewTopic : (req, res) ->
@@ -107,7 +107,6 @@ module.exports =
           topic: req.topic
           title: req.topic.title
           tagInfos: tagInfos
-          baseTagUrl: '/topic/tagged/'
           relativeTags: relativeTags
 
   postTopic : (req, res) ->

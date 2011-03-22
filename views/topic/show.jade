@@ -5,7 +5,7 @@ article
   .post-tags
     - if(typeof topic.tags != 'undefined')
       - each tag in topic.tags
-        a.tag(href='/topic/tagged/' + tag)= tag
+        a.tag(href='/tag/' + tag)= tag
 
   .votes
     a.vote_up(href="/topic/" + topic._id + "/vote/up") #{topic.voteUp} Up

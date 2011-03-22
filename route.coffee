@@ -23,6 +23,9 @@ module.exports = (app) ->
   app.post '/user/profile', loggedIn, users.postProfile
   app.get '/user/logout', loggedIn, users.getLogout
 
+  # tags
+  app.get '/tag/:tags?', topics.getTaggedTopics
+
   # Topics
   app.param 'topicId', topics.paramTopicId
   app.get '/topic/new', loggedIn, topics.getNewTopic
@@ -30,7 +33,5 @@ module.exports = (app) ->
   app.get '/topic/:topicId', topics.getTopic
   app.post '/topic/:topicId?', loggedIn, topics.postTopic
   app.post '/topic/:topicId/comment/:commentIndex?', loggedIn, topics.postComment
-  # tags
-  app.get '/topic/tagged/:tags', topics.getTaggedTopics
   # vote
   app.get '/topic/:topicId/vote/:updown', loggedIn, topics.postVote
