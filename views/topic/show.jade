@@ -1,6 +1,6 @@
 article
   h1= topic.title
-  span.information Post by <b>#{topic.author.username}</b> on <i>#{topic.createDate}</i> with #{topic.numComments} comments
+  span.information Post by <b>#{topic.author.username}</b> on <i>#{humanizeDate(topic.createDate)}</i> with #{topic.numComments} comments
   = topic.content
   .post-tags
     - if(typeof topic.tags != 'undefined')
@@ -18,7 +18,7 @@ h2 #{topic.numComments} comments
     - each comment in topic.comments
       li
         a(name=comment.index)
-        span.comment_information Post by <b>#{comment.user.username}</b> on <i>#{comment.createDate}</i> 
+        span.comment_information Post by <b>#{comment.user.username}</b> on <i>#{humanizeDate(comment.createDate)}</i> 
         = comment.comment
 - else
   p there is no comments yet
