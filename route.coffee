@@ -12,7 +12,7 @@ module.exports = (app) ->
   app.get '*', topTags
 
   #Home
-  app.get '/', home.getHome
+  app.get '/', topics.getTopics
 
   # Users
   app.get '/user/login', users.getLogin
