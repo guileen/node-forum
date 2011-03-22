@@ -29,9 +29,9 @@ module.exports =
     else if now.getYear() is date.getYear()
       format = 'mm-dd'
     else 
-      cNow = Math.floor now.getFullYear()/100
-      cDate = Math.floor date.getFullYear()/100
-      if cNow is cDate
+      centuryNow = Math.floor now.getFullYear()/100
+      centuryDate = Math.floor date.getFullYear()/100
+      if centuryNow is centuryDate
         format = 'yy-mm-dd'
       else
         format = 'yyyy-mm-dd'
