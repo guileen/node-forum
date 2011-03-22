@@ -26,6 +26,42 @@ compareTags = (oldTags, newTags, fn) ->
   else
     fn newTags, oldTags
 
+getRelativeTags = (tags, fn) ->
+  if tags is null or tags.length is 0
+    return TagInfo.findItems {}, {limit: 10, sort: [['count', -1]]}, fn
+  else if tags.length is 1
+    map = "function(){
+        if(this.tags.indexOf('#{tags[0]}')>=0){
+          for(var i in this.tags){
+            if(this.tags[i]!='#{tags[0]}') 
+              emit(this.tags[i], 1)
+          }
+        }
+    }"
+  else
+    map = ()->
+      for t in tags
+        y and= t in this.tags
+      if y
+        for t in this.tags
+          emit(t, 1) unless t in tags
+
+  reduce = 'function(key, values){
+    var count = 0;
+    for( i in values){
+      count += values[i];
+    }
+    return count;
+  }'
+
+  Topic.mapReduce map, reduce, (err, collection) ->
+    if err
+      if err.result
+        console.dir err.result
+      return fn err
+    collection.find {}, {limit: 10, sort: [['value', -1]]}, (err, cursor)->
+      cursor.toArray fn
+
 module.exports = 
 
   paramTopicId: (req, res, next, id) ->
@@ -42,18 +78,22 @@ module.exports =
 
   getTopics : (req, res) ->
     Topic.findItems {}, {comments:0}, {sort: [['lastUpdate', -1]]}, (err, topics) ->
-      res.render 'topic/list', 
-        topics: topics
-        title: 'Latest topics'
+      getRelativeTags null, (err, relativeTags) ->
+        res.render 'topic/list', 
+          topics: topics
+          title: 'Latest topics'
+          relativeTags: relativeTags
 
   getTaggedTopics : (req, res) ->
     tags = req.params.tags.split('+')
     Topic.findItems { tags : { $all : tags } }, {sort: [['lastUpdate', -1]]}, (err, topics) ->
       TagInfo.findItems {name: {$in : tags}}, (err, tagInfos) ->
-        res.render 'topic/list', 
-          topics: topics
-          title: 'Latest topics'
-          tagInfos: tagInfos
+        getRelativeTags tags, (err, relativeTags) ->
+          res.render 'topic/list', 
+            topics: topics
+            title: 'Latest topics'
+            boardTags: tagInfos
+            relativeTags: relativeTags
 
   getNewTopic : (req, res) ->
     res.render 'topic/new',
@@ -66,10 +106,12 @@ module.exports =
 
   getTopic : (req, res) ->
     TagInfo.findItems {name: {$in : req.topic.tags}}, (err, tagInfos) ->
-      res.render 'topic/show', 
-        topic: req.topic
-        title: req.topic.title
-        tagInfos: tagInfos
+      getRelativeTags req.topic.tags, (err, relativeTags) ->
+        res.render 'topic/show', 
+          topic: req.topic
+          title: req.topic.title
+          tagInfos: tagInfos
+          relativeTags: relativeTags
 
   postTopic : (req, res) ->
     tagsToArray req.body.tags, (err, tags) ->
