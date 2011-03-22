@@ -1,6 +1,8 @@
 
 express = require('express')
 route = require('./route')
+helpers = require('./helpers/helpers')
+dynamicHelpers = require('./helpers/dynamicHelpers')
 
 app = module.exports = express.createServer()
 
@@ -23,16 +25,9 @@ app.configure 'development', () ->
 app.configure 'production', () ->
   app.use(express.errorHandler())
 
-app.dynamicHelpers({
-  user: (req) ->
-    req.session.user
+app.helpers(helpers)
 
-  recentlyTopics: (req) ->
-    req.recentlyTopics
-
-  topTags: (req) ->
-    req.topTags
-})
+app.dynamicHelpers(dynamicHelpers)
 
 # Routes
 
