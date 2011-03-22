@@ -29,32 +29,26 @@ compareTags = (oldTags, newTags, fn) ->
 getRelativeTags = (tags, fn) ->
   if tags is null or tags.length is 0
     return TagInfo.findItems {}, {limit: 10, sort: [['count', -1]]}, fn
-  else if tags.length is 1
-    map = "function(){
-        if(this.tags.indexOf('#{tags[0]}')>=0){
-          for(var i in this.tags){
-            if(this.tags[i]!='#{tags[0]}') 
-              emit(this.tags[i], 1)
-          }
-        }
-    }"
-  else
-    map = ()->
-      for t in tags
-        y and= t in this.tags
-      if y
-        for t in this.tags
-          emit(t, 1) unless t in tags
-
   reduce = 'function(key, values){
     var count = 0;
-    for( i in values){
+    for(var i in values){
       count += values[i];
     }
     return count;
   }'
 
-  Topic.mapReduce map, reduce, (err, collection) ->
+  map = 'function(){
+    for(i in this.tags){
+      tag = this.tags[i];
+      if(tags.indexOf(tag)<0)
+        emit(tag, 1);
+    }
+  }'
+
+  Topic.mapReduce map, reduce, {
+    query: {tags:{$all:tags}}
+    scope: {tags: tags}
+  }, (err, collection) ->
     if err
       if err.result
         console.dir err.result
@@ -82,6 +76,7 @@ module.exports =
         res.render 'topic/list', 
           topics: topics
           title: 'Latest topics'
+          baseTagUrl: '/topic/tagged/'
           relativeTags: relativeTags
 
   getTaggedTopics : (req, res) ->
@@ -93,6 +88,7 @@ module.exports =
             topics: topics
             title: 'Latest topics'
             boardTags: tagInfos
+            baseTagUrl: "/topic/tagged/#{tags.join('+')}+"
             relativeTags: relativeTags
 
   getNewTopic : (req, res) ->
@@ -111,6 +107,7 @@ module.exports =
           topic: req.topic
           title: req.topic.title
           tagInfos: tagInfos
+          baseTagUrl: '/topic/tagged/'
           relativeTags: relativeTags
 
   postTopic : (req, res) ->
