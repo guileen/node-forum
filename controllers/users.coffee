@@ -1,5 +1,5 @@
 crypto = require('crypto')
-users = require('../providers/users')
+users = db.users
 
 encryptPassword = (password) ->
   sha1 = crypto.createHmac('sha1', 'sha1 key')

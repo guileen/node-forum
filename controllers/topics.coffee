@@ -1,7 +1,5 @@
-Topic = require '../providers/topics'
-TagInfo = require '../providers/taginfo'
-mongodb = require 'mongodb'
-ObjectID = mongodb.BSONNative.ObjectID
+Topic = db.topics
+TagInfo = db.taginfo
 
 tagsToArray = (tags, fn) ->
   tags = tags.replace /[\s,]+/g, ' '
@@ -58,22 +56,10 @@ getRelativeTags = (tags, fn) ->
 
 module.exports = 
 
-  paramTopicId: (req, res, next, id) ->
-    if id
-      Topic.findOne _id : ObjectID.createFromHexString(id), (err, topic) ->
-        if err
-          return next err
-        if not topic
-          return next new Error 'fail to find topic'
-        req.topic = topic
-        next()
-    else
-      next()
-
   getTopics : (req, res) ->
     Topic.findItems {}, {comments:0}, {sort: [['lastUpdate', -1]]}, (err, topics) ->
       getRelativeTags null, (err, relativeTags) ->
-        res.render 'topic/list', 
+        res.render 'topic/list',
           topics: topics
           title: 'Latest topics'
           relativeTags: relativeTags
@@ -96,55 +82,63 @@ module.exports =
       title: 'New Topic'
 
   getModifyTopic : (req, res) ->
-    res.render 'topic/edit',
-      title: 'Modify Topic'
-      topic: req.topic
+    Topic.findById req.params.topicId, (err, topic)->
+      res.render 'topic/edit',
+        title: 'Modify Topic'
+        topic: req.topic
 
   getTopic : (req, res) ->
-    TagInfo.findItems {name: {$in : req.topic.tags}}, (err, tagInfos) ->
-      getRelativeTags req.topic.tags, (err, relativeTags) ->
-        res.render 'topic/show', 
-          topic: req.topic
-          title: req.topic.title
-          tagInfos: tagInfos
-          relativeTags: relativeTags
+    Topic.findById req.params.topicId, (err, topic) ->
+      TagInfo.findItems {name: {$in : topic.tags}}, (err, tagInfos) ->
+        getRelativeTags topic.tags, (err, relativeTags) ->
+          res.render 'topic/show', 
+            topic: topic
+            title: topic.title
+            tagInfos: tagInfos
+            relativeTags: relativeTags
 
-  postTopic : (req, res) ->
+  postNewTopic : (req, res) ->
     tagsToArray req.body.tags, (err, tags) ->
-      topic = req.topic or {
-        author: req.session.user,
-        numComments: 0,
-        voteUp: 0,
-        voteDown: 0,
-        vote: 0,
+      topic = 
+        author: req.session.user
+        numComments: 0
+        voteUp: 0
+        voteDown: 0
+        vote: 0
         createDate: new Date()
-      }
+        tags: tags
 
+      Topic.insert topic, (err, topic) ->
+        tags.forEach (tag) ->
+          TagInfo.update {name: tag}, {$inc: {count: 1}}, {upsert: true}, (err, docs)->
+
+  postModifyTopic : (req, res) ->
+    tagsToArray req.body.tags, (err, tags) ->
+      topic = req.topic 
       topic.title= req.body.title
       topic.content = req.body.content
       topic.lastUpdate = new Date()
-
-      # retrieve addedTags and removedTags
       tags or= []
-      compareTags topic.tags, tags, (addedTags, removedTags)->
-        topic.tags = tags
-        Topic.save topic, (err, topic)->
-          res.redirect "/topic/#{topic._id}"
-          addedTags.forEach (tag)->
-            TagInfo.update {name: tag}, {$inc: {count: 1}}, {upsert: true}, (err, docs)->
-          TagInfo.update {name: {$in: removedTags}}, {$inc: {count: -1}}, (err, docs)->
+      Topic.findById req.params.topicId, {tags:1}, (err, topic) ->
+        compareTags topic.tags, tags, (addedTags, removedTags)->
+          topic.tags = tags
+          Topic.updateById req.params.topicId, {$set: {tags: tags}}, (err, reply)-> 
+            res.redirect "/topic/#{req.params.topicId}"
+            addedTags.forEach (tag)->
+              TagInfo.update {name: tag}, {$inc: {count: 1}}, {upsert: true}, (err, docs)->
+            TagInfo.update {name: {$in: removedTags}}, {$inc: {count: -1}}, (err, docs)->
 
 
   postComment : (req, res) ->
     topic = req.topic
     index = 0
-    if req.param.commentIndex
+    if req.params.commentIndex
       if req.query.delete
-        topic.comments.splice(req.param.commentIndex, 1)
+        topic.comments.splice(req.params.commentIndex, 1)
         topic.numComments--
       else
-        index = req.param.commentIndex + 1
-        topic.comments[req.param.commentIndex].comment = req.body.comment
+        index = req.params.commentIndex + 1
+        topic.comments[req.params.commentIndex].comment = req.body.comment
     else
       topic.comments or= []
       index = topic.comments.length + 1

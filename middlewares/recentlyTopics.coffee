@@ -1,4 +1,4 @@
-Topic = require '../providers/topics'
+Topic = db.topics
 
 module.exports = (req, res, next) ->
   Topic.findItems {},{comments: 0},{sort: [['lastUpdate', -1]]}, (err, topics) ->

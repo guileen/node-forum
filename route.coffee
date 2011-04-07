@@ -27,11 +27,11 @@ module.exports = (app) ->
   app.get '/tag/:tags?', topics.getTaggedTopics
 
   # Topics
-  app.param 'topicId', topics.paramTopicId
   app.get '/topic/new', loggedIn, topics.getNewTopic
   app.get '/topic/:topicId/modify', loggedIn, topics.getModifyTopic
   app.get '/topic/:topicId', topics.getTopic
-  app.post '/topic/:topicId?', loggedIn, topics.postTopic
+  app.post '/topic/', loggedIn, topics.postNewTopic
+  app.post '/topic/:topicId', loggedIn, topics.postModifyTopic
   app.post '/topic/:topicId/comment/:commentIndex?', loggedIn, topics.postComment
   # vote
   app.get '/topic/:topicId/vote/:updown', loggedIn, topics.postVote
