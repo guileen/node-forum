@@ -3,7 +3,6 @@ global.settings = require('./settings')
 global.db = require('./db')
 
 express = require('express')
-route = require('./route')
 helpers = require('./helpers/helpers')
 dynamicHelpers = require('./helpers/dynamicHelpers')
 
@@ -32,9 +31,19 @@ app.helpers(helpers)
 
 app.dynamicHelpers(dynamicHelpers)
 
+# Middlewares
+#
+{ recentlyTopics } = require './middlewares'
+topTags = require './middlewares/toptags'
+
+#Middlewares
+app.get '*', recentlyTopics
+app.get '*', topTags
+
 # Routes
 
-route app
+['home', 'topics', 'users'].forEach (controller)->
+  require('./controllers/'+controller)(app)
 
 # Only listen on $ node app.js
 

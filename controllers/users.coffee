@@ -17,59 +17,61 @@ authenticate = (username, password, fn) ->
     else 
       fn(new Error('Wrong password'))
 
-exports.getSignUp = (req, res) ->
-  res.render('users/signup', title: 'Sign up')
+module.exports = (app) ->
 
-exports.postSignUp = (req, res) ->
-  users.save
-    username: req.body.username
-    email: req.body.email
-    password: encryptPassword req.body.password
-    createDate: new Date()
-    , (err, user) ->
-      console.log err.stack if err
+  app.get '/user/signup', (req, res) ->
+    res.render('users/signup', title: 'Sign up')
 
-      req.session.regenerate ()->
+  app.post '/user/signup', (req, res) ->
+    users.save
+      username: req.body.username
+      email: req.body.email
+      password: encryptPassword req.body.password
+      createDate: new Date()
+      , (err, user) ->
+        console.log err.stack if err
+
+        req.session.regenerate ()->
+          req.session.user = user
+          res.redirect(req.body.continue || '/user/profile')
+
+  app.get '/user/login', (req, res) ->
+    res.render('users/login', title: 'Login')
+
+  app.post '/user/login', (req, res) ->
+    authenticate req.body.username, req.body.password, (err, user) ->
+      if err
+        if req.is 'json'
+          res.send {login: false, message: err.message}
+        else 
+          res.render 'users/login', 
+            fail: true
+            message: err.message
+            title: 'Login'
+
+      else if (user)
         req.session.user = user
-        res.redirect(req.body.continue || '/user/profile')
-
-exports.getLogin = (req, res) ->
-  res.render('users/login', title: 'Login')
-
-exports.postLogin = (req, res) ->
-  authenticate req.body.username, req.body.password, (err, user) ->
-    if err
-      if req.is 'json'
-        res.send {login: false, message: err.message}
+        if (req.is('json')) 
+          res.send({login: true})
+        else 
+          res.redirect(req.query.continue || '/')
       else 
-        res.render 'users/login', 
-          fail: true
-          message: err.message
-          title: 'Login'
+        if (req.is('json')) 
+          res.send({login: false})
+        else 
+          res.render 'users/login', 
+            fail: true
+            message: 'username or password is incorrect'
+            username: req.body.username
+            continue: req.body.continue || ''
+            title : 'Login'
 
-    else if (user)
-      req.session.user = user
-      if (req.is('json')) 
-        res.send({login: true})
-      else 
-        res.redirect(req.query.continue || '/')
-    else 
-      if (req.is('json')) 
-        res.send({login: false})
-      else 
-        res.render 'users/login', 
-          fail: true
-          message: 'username or password is incorrect'
-          username: req.body.username
-          continue: req.body.continue || ''
-          title : 'Login'
+  app.get '/user/logout', (req, res) ->
+    req.session.destroy ()->
+      res.redirect '/'
 
-exports.getLogout = (req, res) ->
-  req.session.destroy ()->
-    res.redirect '/'
+  app.get '/user/profile', (req, res) ->
+    res.render 'users/profile', 'title': 'Profile'
 
-exports.getProfile = (req, res) ->
-  res.render 'users/profile', 'title': 'Profile'
-
-exports.postProfile = (req, res) ->
+  app.post '/user/profile', (req, res) ->
 

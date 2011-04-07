@@ -1,3 +1,4 @@
+{loggedIn, role} = require '../middlewares'
 Topic = db.topics
 TagInfo = db.taginfo
 
@@ -54,9 +55,9 @@ getRelativeTags = (tags, fn) ->
     collection.find {}, {limit: 10, sort: [['value', -1]]}, (err, cursor)->
       cursor.toArray fn
 
-module.exports = 
+module.exports = (app)->
 
-  getTopics : (req, res) ->
+  app.get '/topic/', (req, res) ->
     Topic.findItems {}, {comments:0}, {sort: [['lastUpdate', -1]]}, (err, topics) ->
       getRelativeTags null, (err, relativeTags) ->
         res.render 'topic/list',
@@ -64,7 +65,7 @@ module.exports =
           title: 'Latest topics'
           relativeTags: relativeTags
 
-  getTaggedTopics : (req, res) ->
+  app.get '/tag/:tags?', (req, res) ->
     if not req.params.tags
       return res.redirect '/'
     tags = req.params.tags.split('+')
@@ -77,17 +78,17 @@ module.exports =
             boardTags: tagInfos
             relativeTags: relativeTags
 
-  getNewTopic : (req, res) ->
+  app.get '/topic/new', (req, res) ->
     res.render 'topic/new',
       title: 'New Topic'
 
-  getModifyTopic : (req, res) ->
+  app.get '/topic/:topicId/modify', loggedIn, (req, res) ->
     Topic.findById req.params.topicId, (err, topic)->
       res.render 'topic/edit',
         title: 'Modify Topic'
         topic: req.topic
 
-  getTopic : (req, res) ->
+  app.get '/topic/:topicId', (req, res) ->
     Topic.findById req.params.topicId, (err, topic) ->
       TagInfo.findItems {name: {$in : topic.tags}}, (err, tagInfos) ->
         getRelativeTags topic.tags, (err, relativeTags) ->
@@ -97,7 +98,7 @@ module.exports =
             tagInfos: tagInfos
             relativeTags: relativeTags
 
-  postNewTopic : (req, res) ->
+  app.post '/topic/', loggedIn, (req, res) ->
     tagsToArray req.body.tags, (err, tags) ->
       topic = 
         author: req.session.user
@@ -112,7 +113,7 @@ module.exports =
         tags.forEach (tag) ->
           TagInfo.update {name: tag}, {$inc: {count: 1}}, {upsert: true}, (err, docs)->
 
-  postModifyTopic : (req, res) ->
+  app.post '/topic/:topicId', loggedIn, (req, res) ->
     tagsToArray req.body.tags, (err, tags) ->
       topic = req.topic 
       topic.title= req.body.title
@@ -129,7 +130,7 @@ module.exports =
             TagInfo.update {name: {$in: removedTags}}, {$inc: {count: -1}}, (err, docs)->
 
 
-  postComment : (req, res) ->
+  app.post '/topic/:topicId/comment/:commentIndex?', loggedIn, (req, res) ->
     topic = req.topic
     index = 0
     if req.params.commentIndex
@@ -154,7 +155,7 @@ module.exports =
     Topic.save topic, (err, topic) ->
       res.redirect "/topic/#{topic._id}##{index}"
 
-  postVote: (req, res) ->
+  app.get '/topic/:topicId/vote/:updown', loggedIn, (req, res) ->
     user = req.session.user.username
     operation = req.params.updown
     topic = req.topic
