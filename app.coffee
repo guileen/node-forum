@@ -1,3 +1,6 @@
+require.paths.unshift(__dirname + '/support')
+global.settings = require('./settings')
+global.db = require('./db')
 
 express = require('express')
 route = require('./route')
