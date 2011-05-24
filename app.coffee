@@ -10,13 +10,14 @@ app = module.exports = express.createServer()
 
 # Configuration
 
+RedisStore = require('connect-redis')
 app.configure () ->
   app.set('views', __dirname + '/views')
   app.set('view engine', 'jade')
   app.use(express.bodyParser())
   app.use(express.methodOverride())
   app.use(express.cookieParser())
-  app.use(express.session({ secret: 'your secret here' }))
+  app.use(express.session({ secret: "sexy girls", store: new RedisStore }))
   app.use(require('stylus').middleware({ src: __dirname + '/public' }))
   app.use(app.router)
   app.use(express.static(__dirname + '/public'))
