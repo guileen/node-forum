@@ -43,14 +43,14 @@ html
 
     section.row
       .col.col_11
-        - if(typeof(boardTags) != 'undefined')
+        - if(locals.boardTags)
           ul.current_tags
             - each tag in boardTags
               li
                 a.tag(href='/tag/' + tag.name)= tag.name
                 a.remove(href=urlRemoveTag(boardTags, tag.name)) &#10005;
 
-          - if(typeof(relativeTags) != 'undefined')
+          - if(locals.relativeTags)
             .tags.relative_tags
               span &raquo;
               - each tag in relativeTags
@@ -58,7 +58,7 @@ html
 
         != body
       .col.col_5.sidebar
-        - if(typeof(tagInfos) != 'undefined')
+        - if(locals.tagInfos)
           nav.page_tags
             h3 Tags
             ul
@@ -67,7 +67,7 @@ html
                   a.tag(href='/tag/' + tag.name)= tag.name
                   span (#{tag.count})
 
-        - if(typeof(topTags) != 'undefined')
+        - if(locals.topTags)
           nav.top_tags
             h3 Top Tags
             ul
@@ -76,11 +76,12 @@ html
                   a.tag(href='/tag/' + tag.name)= tag.name
                   span (#{tag.count})
         nav
-          h3 Recently Topics
-          ul
-            - each topic in recentlyTopics
-              li
-                a(href='/topic/' + topic._id)= topic.title
+          - if(locals.recentlyTopics)
+            h3 Recently Topics
+            ul
+              - each topic in recentlyTopics
+                li
+                  a(href='/topic/' + topic._id)= topic.title
 
     footer.row
       p &copy;all rights reservered. 
