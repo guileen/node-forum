@@ -6,7 +6,7 @@ form#form_topic.col.col_10(method="post", action='/topic')
       input.required.box_shadow(autofocus, type="text", name="title", minlength="4", placeholder='input title here')
     .textarea
       label Content
-      textarea.required.box_shadow(name='content', minlength='20', placeholder='input content here')
+      textarea.post-content.required.box_shadow(name='content', minlength='20', placeholder='input content here')
     div
       label Tags
       input.required.box_shadow(type='text', name='tags', placeholder='separate with space')
