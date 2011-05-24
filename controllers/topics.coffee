@@ -86,7 +86,7 @@ module.exports = (app)->
     Topic.findById req.params.topicId, (err, topic)->
       res.render 'topic/edit',
         title: 'Modify Topic'
-        topic: req.topic
+        topic: topic
 
   app.get '/topic/:topicId', (req, res) ->
     Topic.findById req.params.topicId, (err, topic) ->
@@ -101,6 +101,9 @@ module.exports = (app)->
   app.post '/topic/', loggedIn, (req, res) ->
     tagsToArray req.body.tags, (err, tags) ->
       topic = 
+        title: req.body.title
+        content: req.body.content
+        lastUpdate: new Date()
         author: req.session.user
         numComments: 0
         voteUp: 0
@@ -109,84 +112,85 @@ module.exports = (app)->
         createDate: new Date()
         tags: tags
 
-      Topic.insert topic, (err, topic) ->
+      Topic.insert topic, (err, topics) ->
+        res.redirect '/topic/' + topics[0]._id.toString()
         tags.forEach (tag) ->
           TagInfo.update {name: tag}, {$inc: {count: 1}}, {upsert: true}, (err, docs)->
 
   app.post '/topic/:topicId', loggedIn, (req, res) ->
-    tagsToArray req.body.tags, (err, tags) ->
-      topic = req.topic 
-      topic.title= req.body.title
-      topic.content = req.body.content
-      topic.lastUpdate = new Date()
-      tags or= []
-      Topic.findById req.params.topicId, {tags:1}, (err, topic) ->
-        compareTags topic.tags, tags, (addedTags, removedTags)->
-          topic.tags = tags
-          Topic.updateById req.params.topicId, {$set: {tags: tags}}, (err, reply)-> 
-            res.redirect "/topic/#{req.params.topicId}"
-            addedTags.forEach (tag)->
-              TagInfo.update {name: tag}, {$inc: {count: 1}}, {upsert: true}, (err, docs)->
-            TagInfo.update {name: {$in: removedTags}}, {$inc: {count: -1}}, (err, docs)->
+    Topic.findById req.params.topicId, (err, topic) ->
+      tagsToArray req.body.tags, (err, tags) ->
+        topic.title= req.body.title
+        topic.content = req.body.content
+        topic.lastUpdate = new Date()
+        tags or= []
+        Topic.findById req.params.topicId, {tags:1}, (err, topic) ->
+          compareTags topic.tags, tags, (addedTags, removedTags)->
+            topic.tags = tags
+            Topic.updateById req.params.topicId, {$set: {tags: tags}}, (err, reply)-> 
+              res.redirect "/topic/#{req.params.topicId}"
+              addedTags.forEach (tag)->
+                TagInfo.update {name: tag}, {$inc: {count: 1}}, {upsert: true}, (err, docs)->
+              TagInfo.update {name: {$in: removedTags}}, {$inc: {count: -1}}, (err, docs)->
 
 
   app.post '/topic/:topicId/comment/:commentIndex?', loggedIn, (req, res) ->
-    topic = req.topic
-    index = 0
-    if req.params.commentIndex
-      if req.query.delete
-        topic.comments.splice(req.params.commentIndex, 1)
-        topic.numComments--
+    Topic.findById req.params.topicId, (err, topic) ->
+      index = 0
+      if req.params.commentIndex
+        if req.query.delete
+          topic.comments.splice(req.params.commentIndex, 1)
+          topic.numComments--
+        else
+          index = req.params.commentIndex + 1
+          topic.comments[req.params.commentIndex].comment = req.body.comment
       else
-        index = req.params.commentIndex + 1
-        topic.comments[req.params.commentIndex].comment = req.body.comment
-    else
-      topic.comments or= []
-      index = topic.comments.length + 1
-      topic.comments.push({
-        index: index,
-        comment: req.body.comment,
-        user: req.session.user,
-        createDate: new Date(),
-        lastUpdate: new Date()
-      })
-      topic.numComments++
+        topic.comments or= []
+        index = topic.comments.length + 1
+        topic.comments.push({
+          index: index,
+          comment: req.body.comment,
+          user: req.session.user,
+          createDate: new Date(),
+          lastUpdate: new Date()
+        })
+        topic.numComments++
 
-    Topic.save topic, (err, topic) ->
-      res.redirect "/topic/#{topic._id}##{index}"
+      Topic.save topic, (err, topic) ->
+        res.redirect "/topic/#{topic._id}##{index}"
 
   app.get '/topic/:topicId/vote/:updown', loggedIn, (req, res) ->
-    user = req.session.user.username
-    operation = req.params.updown
-    topic = req.topic
-    topic.voteUpUsers or= []
-    topic.voteDownUsers or= []
-    topic.voteUp or= 0
-    topic.voteDown or= 0
-    topic.vote or=0
-    indexOfVoteUp = topic.voteUpUsers.indexOf(user)
-    indexOfVoteDown = topic.voteDownUsers.indexOf(user)
-    if ((operation is 'up' and indexOfVoteUp >= 0 ) or (operation is 'down' and indexOfVoteDown >= 0))
-      if req.is 'json'
-        return res.send {success: false, message: 'You have voted'}
-      else 
-        return res.redirect "/topic/#{topic._id}"
+    Topic.findById req.params.topicId, (err, topic) ->
+      user = req.session.user.username
+      operation = req.params.updown
+      topic.voteUpUsers or= []
+      topic.voteDownUsers or= []
+      topic.voteUp or= 0
+      topic.voteDown or= 0
+      topic.vote or=0
+      indexOfVoteUp = topic.voteUpUsers.indexOf(user)
+      indexOfVoteDown = topic.voteDownUsers.indexOf(user)
+      if ((operation is 'up' and indexOfVoteUp >= 0 ) or (operation is 'down' and indexOfVoteDown >= 0))
+        if req.is 'json'
+          return res.send {success: false, message: 'You have voted'}
+        else 
+          return res.redirect "/topic/#{topic._id}"
 
-    if operation is 'up'
-      topic.voteUpUsers.push(user)
-      topic.voteUp++
-      if indexOfVoteDown >=0
-        topic.voteDownUsers.splice(indexOfVoteDown, 1)
-        topic.voteDown--
-    else if operation is 'down'
-      topic.voteDownUsers.push(user)
-      topic.voteDown++
-      if indexOfVoteUp >=0 
-        topic.voteUpUsers.splice(indexOfVoteUp, 1)
-        topic.voteUp--
-    topic.vote = topic.voteUp - topic.voteDown
+      if operation is 'up'
+        topic.voteUpUsers.push(user)
+        topic.voteUp++
+        if indexOfVoteDown >=0
+          topic.voteDownUsers.splice(indexOfVoteDown, 1)
+          topic.voteDown--
+      else if operation is 'down'
+        topic.voteDownUsers.push(user)
+        topic.voteDown++
+        if indexOfVoteUp >=0 
+          topic.voteUpUsers.splice(indexOfVoteUp, 1)
+          topic.voteUp--
+      topic.vote = topic.voteUp - topic.voteDown
 
-    Topic.save topic, (err, topic) ->
-      if req.is 'json'
-        return res.send {success: true, message: 'You have successfully voted'}
-      res.redirect "/topic/#{topic._id}"
+      Topic.save topic, (err, topic) ->
+        if req.is 'json'
+          return res.send {success: true, message: 'You have successfully voted'}
+        res.redirect "/topic/#{topic._id}"
